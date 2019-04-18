@@ -66,6 +66,7 @@
 
 -(void)loaddata
 {
+    [list removeAllObjects];
     NSMutableDictionary * gds = [NSMutableDictionary dictionaryWithCapacity:5];
     if(goodsname || cid)
     {
@@ -91,25 +92,12 @@
     [self.navigationController popViewControllerAnimated:NO];
 }
 
-//个人管理页面跳转
--(IBAction)personindex:(id)sender
+-(void)passValue:(NSString *)value key:(NSString *)key tag:(NSInteger)tag
 {
-    AppDelegate *myDelegate = [[UIApplication sharedApplication] delegate];
-    if (myDelegate.entityl) {
-        personIndex *_personIndex=[[personIndex alloc]init];
-        [self.navigationController pushViewController:_personIndex animated:NO];
-    }else{
-        NSString *rowString =@"请先登陆！";
-        UIAlertView * alter = [[UIAlertView alloc] initWithTitle:@"提示" message:rowString delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-        [alter show];
-    }
-}
-
-//服务指南页面跳转
--(IBAction)serviceIndex:(id)sender
-{
-    serviceIndex *_serviceIndex=[[serviceIndex alloc]init];
-    [self.navigationController pushViewController:_serviceIndex animated:NO];
+    cid=value;
+    goodsname=key;
+    [self loaddata];
+    [self.goodscollectionview reloadData];
 }
 
 //搜索结果数目
@@ -159,10 +147,12 @@
 {
     if (buttonIndex==2) {
         nameforgoods *_nameforgoods=[[nameforgoods alloc]init];
+        _nameforgoods.delegate=self;
         [self.navigationController pushViewController:_nameforgoods animated:NO];
     }else if (buttonIndex==1)
     {
         classforgoods *_classforgoods=[[classforgoods alloc]init];
+        _classforgoods.delegate=self;
         [self.navigationController pushViewController:_classforgoods animated:NO];
     }
 }

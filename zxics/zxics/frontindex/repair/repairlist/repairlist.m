@@ -35,11 +35,11 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [self.navigationController setNavigationBarHidden:YES];
-    [self.UINavigationBar setBackgroundImage:[UIImage imageNamed:@"logo_bg"] forBarMetrics:UIBarMetricsDefault];    source=@"";//初始化状态为全部
+    [self.UINavigationBar setBackgroundImage:[UIImage imageNamed:@"logo_bg"] forBarMetrics:UIBarMetricsDefault];
+    source=@"";//初始化状态为全部
     list=[[NSMutableArray alloc]initWithCapacity:5];
     btnlist=[[NSMutableArray alloc]initWithCapacity:5];
     [btnlist addObject:allButton];
-    allButton.backgroundColor=[UIColor lightGrayColor];
     
     //加载数据
     page=1;
@@ -81,13 +81,13 @@
     if ([btnlist count]>2) {
         [btnlist removeObjectAtIndex:0];
         UIButton *beforebtn=[btnlist objectAtIndex:0];
-        beforebtn.backgroundColor=[UIColor darkGrayColor];
+        [beforebtn setBackgroundImage:[UIImage imageNamed:@"unseletedBtn"] forState:UIControlStateNormal];
     }else if ([btnlist count]==2)
     {
         UIButton *beforebtn=[btnlist objectAtIndex:0];
-        beforebtn.backgroundColor=[UIColor darkGrayColor];
+        [beforebtn setBackgroundImage:[UIImage imageNamed:@"unseletedBtn"] forState:UIControlStateNormal];
     }
-    btn.backgroundColor=[UIColor lightGrayColor];
+    [btn setBackgroundImage:[UIImage imageNamed:@"selectedBtn"] forState:UIControlStateNormal];
     source=[NSString stringWithFormat:@"%d",btntag];
     if (btntag==5) {
         source=@"";
@@ -152,6 +152,13 @@
         status=@"关闭";
     }
     cell.rateLabel.text=status;
+    
+    //设置圆角边框
+    cell.borderImage.layer.cornerRadius = 5;
+    cell.borderImage.layer.masksToBounds = YES;
+    //设置边框及边框颜色
+    cell.borderImage.layer.borderWidth = 0.8;
+    cell.borderImage.layer.borderColor =[ [UIColor colorWithRed:200.0/255 green:199.0/255  blue:204.0/255 alpha:1.0f] CGColor];
     
     return cell;
 }

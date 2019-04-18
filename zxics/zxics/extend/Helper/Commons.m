@@ -145,4 +145,64 @@
     }
 }
 
+#pragma mark - UIWebViewDelegate
+//webviewHtml内容自适应屏幕宽度
+- (NSString *)webViewDidFinishLoad:(UIWebView *)webView webStr:(NSString *)webStr
+{
+    
+    //js获取body宽度
+    NSString *bodyWidth= [webView stringByEvaluatingJavaScriptFromString: @"document.body.scrollWidth"];
+    
+    int widthOfBody = [bodyWidth intValue];
+    
+    //获取实际要显示的html
+    NSString *html = [self htmlAdjustWithPageWidth:widthOfBody
+                                              html:webStr
+                                           webView:webView];
+    
+    //加载实际要现实的html
+    return html;
+}
+
+//获取宽度已经适配于webView的html。这里的原始html也可以通过js从webView里获取
+- (NSString *)htmlAdjustWithPageWidth:(CGFloat )pageWidth
+                                 html:(NSString *)html
+                              webView:(UIWebView *)webView
+{
+    NSMutableString *str = [NSMutableString stringWithString:html];
+    //计算要缩放的比例
+    CGFloat initialScale = webView.frame.size.width/pageWidth;
+    //将</head>替换为meta+head
+    NSString *stringForReplace = [NSString stringWithFormat:@"<meta name=\"viewport\" content=\" initial-scale=%f, minimum-scale=0.1, maximum-scale=2.0, user-scalable=yes\"></head>",initialScale];
+    
+    NSRange range =  NSMakeRange(0, str.length);
+    //替换
+    [str replaceOccurrencesOfString:@"</head>" withString:stringForReplace options:NSLiteralSearch range:range];
+    return str;
+}
+
+//计算文本获得对应的高度
+-(CGSize)NSStringHeightForLabel:(UIFont*)font width:(int)width Str:(NSString *)Str
+{
+    CGSize size =CGSizeMake(width,0);
+    UIFont * tfont = font;
+    NSDictionary * tdic = [NSDictionary dictionaryWithObjectsAndKeys:tfont,NSFontAttributeName,nil];
+    
+    CGSize  actualsize =[Str boundingRectWithSize:size options:
+                         NSStringDrawingUsesFontLeading |NSStringDrawingUsesLineFragmentOrigin attributes:tdic context:nil].size;
+    return actualsize;
+}
+
+
+//把<null>和(null)转为@“”
+-(NSString *)turnNullValue:(NSString *)key Object:(NSDictionary *)Object
+{
+    NSString *str=[NSString stringWithFormat:@"%@",[Object objectForKey:key]];
+    if ([str isEqualToString:@"<null>"] || [str isEqualToString:@"(null)"]) {
+        return @"";
+    }else{
+        return str;
+    }
+}
+
 @end

@@ -16,6 +16,8 @@
 #import "AppDelegate.h"
 #import "DataService.h"
 #import "ImageCacher.h"
+#import "communityIndex.h"
+#import "wuyeIndex.h"
 
 @interface decorateView ()
 
@@ -48,29 +50,27 @@
     // Do any additional setup after loading the view from its nib.
     list=[[NSMutableArray alloc]initWithCapacity:1];
     
-    //添加controller
-    [self addcontroller];
-    
     //顶部菜单
     [self createtopmenu];
     
-    //自定义tabbar
-    [self identitytabbar];
-    
     //判断是否已登录
     [self islogin];
-    
-    
 }
 
 //添加controller
--(void)addcontroller
+-(void)addcontroller:(NSString *)orgid
 {
-    fontindex *_fontindex=[[fontindex alloc]init];
-    findservice *_findservice=[[findservice alloc]init];
-    mallindex *_mallindex=[[mallindex alloc]init];
-    serviceIndex *_serviceIndex=[[serviceIndex alloc]init];
-    self.viewControllers=[NSArray arrayWithObjects:_fontindex,_findservice,_mallindex,_serviceIndex, nil];
+    if (orgid) {
+        communityIndex *_fontindex=[[communityIndex alloc]init];
+        wuyeIndex *_findservice=[[wuyeIndex alloc]init];
+        self.viewControllers=[NSArray arrayWithObjects:_fontindex,_findservice,nil];
+    }else{
+        fontindex *_fontindex=[[fontindex alloc]init];
+        findservice *_findservice=[[findservice alloc]init];
+        mallindex *_mallindex=[[mallindex alloc]init];
+        serviceIndex *_serviceIndex=[[serviceIndex alloc]init];
+        self.viewControllers=[NSArray arrayWithObjects:_fontindex,_findservice,_mallindex,_serviceIndex, nil];
+    }
 }
 
 
@@ -78,57 +78,24 @@
 -(void)createtopmenu
 {
     //菜单背景
-    UIView *topview=[[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 94)];
-    UIImageView *topimg=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 64)];
+    UIView *topview=[[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40)];
+    UIImageView *topimg=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 40)];
     [topimg setImage:[UIImage imageNamed:@"logo_bg"]];
     
     //logo图片
-    UIImageView *logoimg=[[UIImageView alloc]initWithFrame:CGRectMake(24, 20, 70, 30)];
+    UIImageView *logoimg=[[UIImageView alloc]initWithFrame:CGRectMake(10, 5, 100, 30)];
     [logoimg setImage:[UIImage imageNamed:@"logo_title"]];
     [topview addSubview:logoimg];
     
     //登录按钮
-    settingbtn=[[UIButton alloc]initWithFrame:CGRectMake(245, 15, 40, 40)];
+    settingbtn=[[UIButton alloc]initWithFrame:CGRectMake(275, 5, 30, 30)];
     [settingbtn setImage:[UIImage imageNamed:@"login_title"] forState:UIControlStateNormal];
     [settingbtn addTarget:self action:@selector(login) forControlEvents:UIControlEventTouchDown];
     [topview addSubview:settingbtn];
     
-    //选择社区背景图
-    UIImageView *comimg=[[UIImageView alloc]initWithFrame:CGRectMake(0, 64, 320, 30)];
-    [comimg setBackgroundColor:[UIColor colorWithRed:75/255.0 green:192/255.0 blue:250/255.0 alpha:1.0f]];
-    [topview addSubview:comimg];
-    
-    //选择社区
-    UILabel *selectcom=[[UILabel alloc]initWithFrame:CGRectMake(85, 64, 50, 30)];
-    [selectcom setFont:[UIFont boldSystemFontOfSize:12.0f]];
-    selectcom.text=@"选择小区";
-    [selectcom setTextColor:[UIColor whiteColor]];
-    [topview addSubview:selectcom];
-    
-    //社区按钮
-    UIButton *selectcombtn=[[UIButton alloc]initWithFrame:CGRectMake(215, 68, 20, 20)];
-    [selectcombtn setImage:[UIImage imageNamed:@"scombtn"] forState:UIControlStateNormal];
-    [selectcombtn addTarget:self action:@selector(showmycom) forControlEvents:UIControlEventTouchDown];
-    [topview addSubview:selectcombtn];
-    
-    //社区text
-    scomtext=[[UITextField alloc]initWithFrame:CGRectMake(135, 68, 80, 19)];
-    [scomtext setBorderStyle:UITextBorderStyleNone];
-    [scomtext setBackgroundColor:[UIColor whiteColor]];
-    scomtext.userInteractionEnabled=NO;
-    scomtext.font=[UIFont boldSystemFontOfSize:12.0f];
-    [topview addSubview:scomtext];
-    
-    //社区下拉框
-    comTView=[[UITableView alloc]initWithFrame:CGRectMake(135, 87, 100, 100)];
-    comTView.delegate=self;
-    comTView.dataSource=self;
-    comTView.hidden=YES;
-    
 
     [self.view addSubview:topimg];
     [self.view addSubview:topview];
-    [self.view addSubview:comTView];
 }
 
 
@@ -137,7 +104,7 @@
 {
     
     //删除现有的tabBar
-    [self.tabBar setFrame:CGRectMake(self.tabBar.frame.origin.x, self.tabBar.frame.origin.y-11, self.tabBar.frame.size.width, 60)];
+    [self.tabBar setFrame:CGRectMake(self.tabBar.frame.origin.x, self.tabBar.frame.origin.y-1, self.tabBar.frame.size.width, 50)];
     CGRect rect = self.tabBar.bounds; //这里要用bounds来加, 否则会加到下面去.看不见
     //LogFrame(self.tabBar);
     
@@ -162,9 +129,15 @@
     
     //为控制器添加按钮
     for (int i=0; i<count; i++) { //根据有多少个子视图控制器来进行添加按钮
+        NSString *selStr=@"";
+        if (count==2) {
+            selStr=@"wuye";
+        }else{
+            selStr=@"TabBar";
+        }
         
-        NSString *imageName = [NSString stringWithFormat:@"TabBar%d", i + 1];
-        NSString *imageNameSel = [NSString stringWithFormat:@"TabBar%dSel", i + 1];
+        NSString *imageName = [NSString stringWithFormat:@"%@%d", selStr,i + 1];
+        NSString *imageNameSel = [NSString stringWithFormat:@"%@%dSel", selStr,i + 1];
         
         UIImage *image = [UIImage imageNamed:imageName];
         UIImage *imageSel = [UIImage imageNamed:imageNameSel];
@@ -177,22 +150,104 @@
 -(void)islogin
 {
     AppDelegate *myDelegate = [[UIApplication sharedApplication] delegate];
-    if (myDelegate.entityl) {
-        //头像
-        NSString *url=[NSString stringWithFormat:@"%@",myDelegate.entityl.headimg];
-        NSURL *imgUrl=[NSURL URLWithString:url];
-        NSData* data = [NSData dataWithContentsOfURL:imgUrl];
-        UIImage *img=[UIImage imageWithData:data];
-        [settingbtn setImage:img forState:UIControlStateNormal];
-        settingbtn.layer.cornerRadius = settingbtn.frame.size.width / 2;
-        settingbtn.clipsToBounds = YES;
-        settingbtn.layer.borderWidth = 3.0f;
-        settingbtn.layer.borderColor = [UIColor whiteColor].CGColor;
+    if (myDelegate.entityl.userid) {
         
-        scomtext.text=myDelegate.entityl.communityName;
-        [settingbtn removeTarget:self action:@selector(login) forControlEvents:UIControlEventTouchDown];
-        [settingbtn addTarget:self action:@selector(personindex) forControlEvents:UIControlEventTouchDown];
+        NSString *orgid=[NSString stringWithFormat:@"%@",myDelegate.entityl.orgId];
+        if (orgid!=nil && ![orgid isEqualToString:@""]) {
+            
+            UILabel *wname=[[UILabel alloc]init];
+            wname.font=[UIFont systemFontOfSize:12.0f];
+            wname.frame=CGRectMake(self.view.frame.size.width/2+10, (40-40/3)/2, 100, 40/3);
+            wname.text=[NSString stringWithFormat:@"%@",myDelegate.entityl.name];
+            [self.view addSubview:wname];
+            
+            [settingbtn setImage:[UIImage imageNamed:@"t_quit"] forState:UIControlStateNormal];
+            [settingbtn removeTarget:self action:@selector(login) forControlEvents:UIControlEventTouchDown];
+            [settingbtn addTarget:self action:@selector(logout) forControlEvents:UIControlEventTouchDown];
+            
+            
+            [self addcontroller:myDelegate.entityl.orgId];
+        }else{
+            
+            //头像
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                // 耗时的操作（异步操作）
+                
+                [settingbtn setImage:[UIImage imageNamed:@"head_portrait"] forState:UIControlStateNormal];
+                NSString *url=[NSString stringWithFormat:@"%@",myDelegate.entityl.headimg];
+                NSURL *imgUrl=[NSURL URLWithString:url];
+                NSData* data = [NSData dataWithContentsOfURL:imgUrl];
+                UIImage *img=[UIImage imageWithData:data];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    [settingbtn setImage:img forState:UIControlStateNormal];
+                    
+                });
+            });
+            
+            
+            scomtext.text=myDelegate.entityl.communityName;
+            [settingbtn removeTarget:self action:@selector(login) forControlEvents:UIControlEventTouchDown];
+            [settingbtn addTarget:self action:@selector(personindex) forControlEvents:UIControlEventTouchDown];
+            [self addcontroller:nil];
+            
+            //选择社区背景图
+            UIImageView *comimg=[[UIImageView alloc]initWithFrame:CGRectMake(0, 40, 320, 30)];
+            [comimg setBackgroundColor:[UIColor colorWithRed:75/255.0 green:192/255.0 blue:250/255.0 alpha:1.0f]];
+            [self.view addSubview:comimg];
+            
+            //选择社区
+            UILabel *selectcom=[[UILabel alloc]initWithFrame:CGRectMake(65, 40, 100, 30)];
+            [selectcom setFont:[UIFont boldSystemFontOfSize:15.0f]];
+            selectcom.text=@"选择小区:";
+            [selectcom setTextColor:[UIColor whiteColor]];
+            [self.view addSubview:selectcom];
+            
+            //社区按钮
+            UIButton *selectcombtn=[[UIButton alloc]initWithFrame:CGRectMake(215, 44, 20, 20)];
+            [selectcombtn setImage:[UIImage imageNamed:@"scombtn"] forState:UIControlStateNormal];
+            [selectcombtn addTarget:self action:@selector(showmycom) forControlEvents:UIControlEventTouchDown];
+            [self.view addSubview:selectcombtn];
+            
+            //社区text
+            scomtext=[[UITextField alloc]initWithFrame:CGRectMake(135, 44, 80, 19)];
+            [scomtext setBorderStyle:UITextBorderStyleNone];
+            [scomtext setBackgroundColor:[UIColor whiteColor]];
+            scomtext.userInteractionEnabled=NO;
+            scomtext.font=[UIFont boldSystemFontOfSize:12.0f];
+            [self.view addSubview:scomtext];
+            
+            //社区下拉框
+            comTView=[[UITableView alloc]initWithFrame:CGRectMake(135, 63, 100, 100)];
+            comTView.delegate=self;
+            comTView.dataSource=self;
+            comTView.hidden=YES;
+            [self.view addSubview:comTView];
+            
+            NSMutableDictionary * comlist = [NSMutableDictionary dictionaryWithCapacity:5];
+            comlist=[DataService PostDataService:[NSString stringWithFormat:@"%@api/findCommunityList",domainser] postDatas:[NSString stringWithFormat:@"userid=%@",myDelegate.entityl.userid]];
+            NSArray *com=[comlist objectForKey:@"datas"];
+            [list removeAllObjects];
+            [list addObjectsFromArray:com];
+            
+            if ([list count]>0) {
+                AppDelegate *myDelegate = [[UIApplication sharedApplication] delegate];
+                NSDictionary *retype=[list objectAtIndex:0];
+                myDelegate.entityl.communityid=[retype objectForKey:@"id"];
+                myDelegate.entityl.communityName=[retype objectForKey:@"name"];
+                scomtext.text=myDelegate.entityl.communityName;
+            }
+        }
+        
+    }else{
+//        [self.view removeFromSuperview];
+        [self addcontroller:nil];
     }
+    
+    //自定义tabbar
+    [self identitytabbar];
 }
 
 /**永远别忘记设置代理*/
@@ -224,19 +279,9 @@
 //登录页面跳转
 -(void)login
 {
-    AppDelegate *myDelegate = [[UIApplication sharedApplication] delegate];
-    if (myDelegate.entityl) {
-        myDelegate.entityl=nil;
-        NSString *rowString =@"退出成功";
-        UIAlertView * alter = [[UIAlertView alloc] initWithTitle:@"提示" message:rowString delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-        [alter show];
-        [self reloadInputViews];
-    }else
-    {
-        login * _login=[[login alloc] init];
-        
-        [self.navigationController pushViewController:_login animated:NO];
-    }
+    login * _login=[[login alloc] init];
+    
+    [self.navigationController pushViewController:_login animated:NO];
 }
 
 //个人管理首页
@@ -270,12 +315,6 @@
     }
 }
 
-//alertview响应事件
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    
-}
-
 //初始化tableview数据
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -292,7 +331,7 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:TableSampleIdentifier];
     }
-    cell.textLabel.font=[UIFont boldSystemFontOfSize:12.0f];
+    cell.textLabel.font=[UIFont boldSystemFontOfSize:10.0f];
     NSUInteger row = [indexPath row];
     NSDictionary *retype=[list objectAtIndex:row];
     cell.textLabel.text = [retype objectForKey:@"name"];
@@ -307,12 +346,29 @@
     NSDictionary *retype=[list objectAtIndex:row];
     myDelegate.entityl.communityid=[retype objectForKey:@"id"];
     myDelegate.entityl.communityName=[retype objectForKey:@"name"];
-    NSString *rowString =@"切换成功";
-    UIAlertView * alter = [[UIAlertView alloc] initWithTitle:@"提示" message:rowString delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-    [alter show];
     scomtext.text=myDelegate.entityl.communityName;
     comTView.hidden=YES;
     
+}
+
+//退出登录
+-(void)logout
+{
+    NSString *rowString =@"是否退出登录？";
+    UIAlertView * alter = [[UIAlertView alloc] initWithTitle:@"提示" message:rowString delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];
+    [alter show];
+}
+
+//alertview响应事件
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex==1) {
+        AppDelegate *myDelegate = [[UIApplication sharedApplication] delegate];
+        myDelegate.entityl=nil;
+        
+        login * _login=[[login alloc] init];
+        [self.navigationController pushViewController:_login animated:NO];
+    }
 }
 
 - (void)didReceiveMemoryWarning
